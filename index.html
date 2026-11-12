@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refill-Go Direct — Refill. Reuse. Reduce.</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Noto Sans Georgian & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans Georgian"', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        forest: {
+                            50: '#f2f7f4',
+                            100: '#e0ede5',
+                            200: '#c2dbcd',
+                            300: '#96c0aa',
+                            400: '#649e81',
+                            500: '#428063',
+                            600: '#2f654d',
+                            700: '#26513f',
+                            800: '#204133',
+                            900: '#1b362b',
+                            950: '#0f2019',
+                        },
+                        cream: {
+                            50: '#fdfcf9',
+                            100: '#f7f5ee',
+                            200: '#eee9db',
+                            300: '#e0d8c0',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar & smooth transitions */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f7f5ee;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c2dbcd;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2f654d;
+        }
+        .tab-active {
+            background-color: #204133;
+            color: #ffffff;
+        }
+        .liquid-fill {
+            transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="bg-cream-50 text-forest-950 font-sans antialiased selection:bg-forest-200 selection:text-forest-900">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Header & Navigation -->
+    <header class="sticky top-0 z-40 bg-cream-50/95 backdrop-blur-md border-b border-cream-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Brand Logo -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('catalog')">
+                    <div class="w-11 h-11 rounded-xl bg-forest-800 flex items-center justify-center text-white shadow-md">
+                        <!-- Leaf SVG Icon -->
+                        <svg class="w-6 h-6 text-forest-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4.97 0-9-4.03-9-9 0-4.97 4.03-9 9-9 4.97 0 9 4.03 9 9 0 1.66-.45 3.22-1.24 4.56M12 3v18m0-12c3.5 0 6 2.5 6 6m-6-2c-3.5 0-6 2.5-6 6"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold tracking-tight text-forest-900 block leading-none">Refill-Go <span class="text-forest-600">Direct</span></span>
+                        <span class="text-xs font-medium text-forest-600 tracking-wider uppercase mt-1 block">Refill. Reuse. Reduce.</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Tabs -->
+                <nav class="hidden lg:flex items-center gap-1.5 bg-cream-100 p-1.5 rounded-2xl border border-cream-200">
+                    <button onclick="switchTab('catalog')" id="nav-catalog" class="nav-btn tab-active px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200">
+                        კატალოგი და გამოწერა
+                    </button>
+                    <button onclick="switchTab('vending')" id="nav-vending" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-forest-800 hover:bg-cream-200/70 transition-all duration-200">
+                        ვენდინგ-სადგურები
+                    </button>
+                    <button onclick="switchTab('bottles')" id="nav-bottles" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-forest-800 hover:bg-cream-200/70 transition-all duration-200 flex items-center gap-1.5">
+                        ჩემი ბოთლები (QR)
+                        <span id="active-bottles-badge" class="bg-forest-600 text-white text-xs px-2 py-0.5 rounded-full">2</span>
+                    </button>
+                    <button onclick="switchTab('b2b')" id="nav-b2b" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-forest-800 hover:bg-cream-200/70 transition-all duration-200">
+                        ბიზნესისთვის (B2B)
+                    </button>
+                </nav>
+
+                <!-- Cart / Eco-Tote Button -->
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleCartDrawer()" class="relative flex items-center gap-2.5 bg-forest-800 hover:bg-forest-900 text-white px-4 py-2.5 rounded-xl font-semibold text-sm shadow-md transition-all active:scale-95">
+                        <svg class="w-5 h-5 text-forest-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        <span class="hidden sm:inline">ეკო-ჩანთა</span>
+                        <span id="cart-count" class="bg-amber-400 text-forest-950 font-bold text-xs w-5 h-5 rounded-full flex items-center justify-center">1</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation Bar -->
+            <div class="flex lg:hidden overflow-x-auto gap-2 py-2.5 border-t border-cream-200 no-scrollbar">
+                <button onclick="switchTab('catalog')" id="m-nav-catalog" class="m-nav-btn tab-active whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all">
+                    კატალოგი
+                </button>
+                <button onclick="switchTab('vending')" id="m-nav-vending" class="m-nav-btn whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-cream-100 text-forest-800 transition-all">
+                    ვენდინგ-სადგურები
+                </button>
+                <button onclick="switchTab('bottles')" id="m-nav-bottles" class="m-nav-btn whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-cream-100 text-forest-800 transition-all">
+                    ჩემი ბოთლები (QR)
+                </button>
+                <button onclick="switchTab('b2b')" id="m-nav-b2b" class="m-nav-btn whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-cream-100 text-forest-800 transition-all">
+                    ბიზნესისთვის (B2B)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Banner & Live Eco-Impact Strip -->
+    <section class="bg-gradient-to-br from-forest-900 via-forest-800 to-forest-950 text-white relative overflow-hidden">
+        <!-- Decorative abstract circles -->
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-forest-700/30 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-7 space-y-5">
+                    <div class="inline-flex items-center gap-2 bg-forest-700/60 border border-forest-600/50 px-3.5 py-1.5 rounded-full text-xs font-medium text-forest-100">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        ოფიციალური Co-Branding პარტნიორობა: Tide &bull; Fairy &bull; PureFill
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight">
+                        საყვარელი ბრენდები <span class="text-emerald-300">ერთჯერადი პლასტმასის</span> გარეშე
+                    </h1>
+                    <p class="text-forest-100 text-base sm:text-lg max-w-2xl leading-relaxed">
+                        შეუკვეთე სახლში მიტანით ან შეავსე საკუთარი ბოთლი ქალაქის ჭკვიან ვენდინგ-სადგურებზე. მიიღე პრემიუმ უჟანგავი ფოლადისა და მინის ტარა და დაზოგე <strong class="text-white">30%-მდე</strong> ყოველ შენაძენზე.
+                    </p>
+                    <div class="flex flex-wrap gap-3 pt-2">
+                        <button onclick="switchTab('catalog')" class="bg-emerald-400 hover:bg-emerald-300 text-forest-950 font-bold px-6 py-3 rounded-xl shadow-lg transition-all active:scale-95 text-sm sm:text-base">
+                            შეკვეთის დაწყება
+                        </button>
+                        <button onclick="switchTab('vending')" class="bg-forest-700/70 hover:bg-forest-700 border border-forest-500/50 text-white font-semibold px-6 py-3 rounded-xl transition-all text-sm sm:text-base flex items-center gap-2">
+                            <svg class="w-5 h-5 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            ვენდინგ-აპარატის პოვნა
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Impact Stats Card -->
+                <div class="lg:col-span-5">
+                    <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-3xl p-6 shadow-2xl">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-semibold uppercase tracking-wider text-emerald-300">შენი ეკო-ზეგავლენა (Live)</h3>
+                            <span class="text-xs bg-emerald-400/20 text-emerald-200 px-2.5 py-1 rounded-full font-medium">100% ნარჩენის გარეშე</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3 text-center">
+                            <div class="bg-forest-950/50 rounded-2xl p-3.5 border border-white/10">
+                                <div id="stat-bottles" class="text-2xl sm:text-3xl font-bold text-white">12</div>
+                                <div class="text-xs text-forest-200 mt-1">დაზოგილი პლასტმასი</div>
+                            </div>
+                            <div class="bg-forest-950/50 rounded-2xl p-3.5 border border-white/10">
+                                <div id="stat-money" class="text-2xl sm:text-3xl font-bold text-emerald-300">34₾</div>
+                                <div class="text-xs text-forest-200 mt-1">დაზოგილი თანხა (-30%)</div>
+                            </div>
+                            <div class="bg-forest-950/50 rounded-2xl p-3.5 border border-white/10">
+                                <div id="stat-co2" class="text-2xl sm:text-3xl font-bold text-amber-300">2.4კგ</div>
+                                <div class="text-xs text-forest-200 mt-1">შემცირებული CO₂</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-forest-200">
+                            <span>სტატუსი: <strong class="text-white">Eco Pioneer</strong></span>
+                            <button onclick="switchTab('bottles')" class="text-emerald-300 hover:underline font-medium">QR ბოთლების ნახვა &rarr;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: CATALOG & SUBSCRIPTION BUILDER      -->
+        <!-- ========================================== -->
+        <section id="tab-catalog" class="tab-section space-y-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-forest-900">პროდუქტების კატალოგი და გამოწერა</h2>
+                    <p class="text-forest-700 text-sm sm:text-base mt-1">აირჩიე სასურველი ბრენდი, მრავალჯერადი ბოთლის ტიპი და ისარგებლე 30%-იანი ფასდაკლებით ტარის გარეშე.</p>
+                </div>
+
+                <!-- Brand Filter Pills -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-semibold text-forest-700 uppercase mr-1">ბრენდი:</span>
+                    <button onclick="setBrandFilter('all')" class="brand-filter-btn bg-forest-800 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" data-brand="all">ყველა</button>
+                    <button onclick="setBrandFilter('Tide')" class="brand-filter-btn bg-cream-200/80 hover:bg-cream-200 text-forest-900 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" data-brand="Tide">Tide</button>
+                    <button onclick="setBrandFilter('Fairy')" class="brand-filter-btn bg-cream-200/80 hover:bg-cream-200 text-forest-900 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" data-brand="Fairy">Fairy</button>
+                    <button onclick="setBrandFilter('PureFill')" class="brand-filter-btn bg-cream-200/80 hover:bg-cream-200 text-forest-900 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all" data-brand="PureFill">PureFill Eco</button>
+                </div>
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="flex overflow-x-auto gap-2 pb-2">
+                <button onclick="setCategoryFilter('all')" class="cat-filter-btn bg-forest-100 border-2 border-forest-700 text-forest-900 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all" data-cat="all">ყველა კატეგორია</button>
+                <button onclick="setCategoryFilter('laundry')" class="cat-filter-btn bg-white border border-cream-300 hover:border-forest-500 text-forest-800 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all" data-cat="laundry">სარეცხი საშუალება</button>
+                <button onclick="setCategoryFilter('dish')" class="cat-filter-btn bg-white border border-cream-300 hover:border-forest-500 text-forest-800 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all" data-cat="dish">ჭურჭლის სარეცხი</button>
+                <button onclick="setCategoryFilter('cleaner')" class="cat-filter-btn bg-white border border-cream-300 hover:border-forest-500 text-forest-800 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all" data-cat="cleaner">საწმენდი საშუალება</button>
+                <button onclick="setCategoryFilter('softener')" class="cat-filter-btn bg-white border border-cream-300 hover:border-forest-500 text-forest-800 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all" data-cat="softener">ქსოვილის დამარბილებელი</button>
+            </div>
+
+            <!-- Product Grid -->
+            <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Products will be dynamically rendered here -->
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: SMART VENDING STATIONS              -->
+        <!-- ========================================== -->
+        <section id="tab-vending" class="tab-section hidden space-y-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-forest-600 bg-forest-100 px-3 py-1 rounded-full">Omnichannel ინფრასტრუქტურა</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-forest-900 mt-2">ჭკვიანი ვენდინგ-სადგურები (Refill Stations)</h2>
+                    <p class="text-forest-700 text-sm sm:text-base mt-1">შეავსე შენი მრავალჯერადი ბოთლი სავაჭრო ობიექტებში წამებში — სახლში მიტანის ლოდინის გარეშე.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Left Column: Station Selector & Details -->
+                <div class="lg:col-span-5 space-y-4">
+                    <h3 class="font-bold text-forest-900 text-lg">აირჩიე სადგური ქალაქში:</h3>
+                    
+                    <div id="stations-list" class="space-y-3">
+                        <!-- Station cards injected by JS -->
+                    </div>
+
+                    <!-- How Vending Works Box -->
+                    <div class="bg-forest-50 border border-forest-200 rounded-2xl p-5 mt-6">
+                        <h4 class="font-bold text-forest-900 text-sm mb-3 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-forest-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            როგორ მუშაობს ვენდინგ-სადგური?
+                        </h4>
+                        <ol class="space-y-2 text-xs sm:text-sm text-forest-800 list-decimal list-inside">
+                            <li>მოიტანე შენი <strong>Refill-Go</strong> ბოთლი (ან შეიძინე ადგილზე აპარატის ქვედა თაროდან).</li>
+                            <li>დაასკანერე ბოთლის <strong>QR-კოდი</strong> აპარატის სენსორზე.</li>
+                            <li>აირჩიე სასურველი ბრენდი და მოცულობა (1L / 2L) და შეავსე ღილაკზე დაჭერით.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Right Column: Interactive Smart Vending Machine Simulator -->
+                <div class="lg:col-span-7">
+                    <div class="bg-forest-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-forest-700">
+                        <div class="flex flex-wrap items-center justify-between gap-2 pb-5 border-b border-forest-700">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                                    <span class="text-xs font-semibold uppercase tracking-wider text-emerald-300">აპარატი ონლაინ რეჟიმშია</span>
+                                </div>
+                                <h3 id="selected-station-title" class="text-xl font-bold mt-1">KIU უნივერსიტეტის კამპუსი — სადგური #01</h3>
+                            </div>
+                            <span class="text-xs bg-forest-800 border border-forest-600 px-3 py-1.5 rounded-xl text-forest-200">
+                                მარაგების Live მონიტორინგი
+                            </span>
+                        </div>
+
+                        <!-- 4 Visual Liquid Tanks (Matching the PDF Presentation Dispenser) -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 my-6" id="vending-tanks">
+                            <!-- Tanks rendered by JS -->
+                        </div>
+
+                        <!-- Interactive Refill Simulation Controls -->
+                        <div class="bg-forest-950/60 rounded-2xl p-5 border border-forest-700/70 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-bold text-emerald-300">ბოთლის შევსების ინტერაქტიული სიმულაცია</span>
+                                <span class="text-xs text-forest-300">დაზოგე 30% ადგილზე</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-xs text-forest-300 mb-1">1. აირჩიე სითხე</label>
+                                    <select id="sim-liquid" class="w-full bg-forest-800 border border-forest-600 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-400">
+                                        <option value="0">Fairy ჭურჭლის სარეცხი (6.50₾/ლ)</option>
+                                        <option value="1">Tide სარეცხი გელი (8.90₾/ლ)</option>
+                                        <option value="2">PureFill საწმენდი (5.50₾/ლ)</option>
+                                        <option value="3">Tide დამარბილებელი (6.00₾/ლ)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-forest-300 mb-1">2. მოცულობა</label>
+                                    <select id="sim-volume" class="w-full bg-forest-800 border border-forest-600 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-400">
+                                        <option value="1">1 ლიტრი</option>
+                                        <option value="2">2 ლიტრი</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-end">
+                                    <button onclick="simulateVendingRefill()" id="sim-refill-btn" class="w-full bg-emerald-400 hover:bg-emerald-300 text-forest-950 font-bold py-2 px-4 rounded-xl text-sm transition-all active:scale-95 shadow-md">
+                                        შევსების დაწყება
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Progress bar for dispensing -->
+                            <div id="dispense-progress-wrapper" class="hidden space-y-1.5 pt-2">
+                                <div class="flex justify-between text-xs text-emerald-300">
+                                    <span id="dispense-status-text">QR კოდი დადასტურდა... მიმდინარეობს შევსება</span>
+                                    <span id="dispense-percent">0%</span>
+                                </div>
+                                <div class="w-full bg-forest-800 rounded-full h-2.5 overflow-hidden">
+                                    <div id="dispense-bar" class="bg-emerald-400 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: QR BOTTLE LIFECYCLE TRACKER         -->
+        <!-- ========================================== -->
+        <section id="tab-bottles" class="tab-section hidden space-y-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-forest-600 bg-forest-100 px-3 py-1 rounded-full">Smart QR ციკლი</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-forest-900 mt-2">ჩემი მრავალჯერადი ბოთლები (QR კონტროლი)</h2>
+                    <p class="text-forest-700 text-sm sm:text-base mt-1">თითოეულ ბოთლს აქვს უნიკალური QR-კოდი, რომელიც აღრიცხავს გამოყენების რაოდენობას, სტერილიზაციასა და კურიერის მიერ დაბრუნების სტატუსს.</p>
+                </div>
+                <button onclick="openQrScannerModal()" class="bg-forest-800 hover:bg-forest-900 text-white font-semibold px-5 py-3 rounded-xl text-sm shadow-md flex items-center gap-2 self-start md:self-auto transition-all active:scale-95">
+                    <svg class="w-5 h-5 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                    </svg>
+                    ახალი QR-ის სკანირება
+                </button>
+            </div>
+
+            <!-- Active Bottles Cards -->
+            <div id="user-bottles-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Rendered via JS -->
+            </div>
+
+            <!-- Sterilization & Hygiene Guarantee Banner -->
+            <div class="bg-white border border-cream-200 rounded-3xl p-6 sm:p-8 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-forest-100 text-forest-800 flex items-center justify-center shrink-0 font-bold text-lg">1</div>
+                    <div>
+                        <h4 class="font-bold text-forest-900">კურიერის მიერ შეგროვება</h4>
+                        <p class="text-xs sm:text-sm text-forest-700 mt-1">ცარიელი ბოთლები თავსდება ნაჭრის ეკო-ჩანთაში და კურიერს მიაქვს შემდეგი შეკვეთის მოტანისას.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-forest-100 text-forest-800 flex items-center justify-center shrink-0 font-bold text-lg">2</div>
+                    <div>
+                        <h4 class="font-bold text-forest-900">პროფესიონალური სტერილიზაცია</h4>
+                        <p class="text-xs sm:text-sm text-forest-700 mt-1">ყოველი ბოთლი გადის მაღალტემპერატურულ რეცხვას, დეზინფექციას და ხარისხის ლაბორატორიულ შემოწმებას.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-forest-100 text-forest-800 flex items-center justify-center shrink-0 font-bold text-lg">3</div>
+                    <div>
+                        <h4 class="font-bold text-forest-900">ხელახალი შევსება და ციკლი</h4>
+                        <p class="text-xs sm:text-sm text-forest-700 mt-1">სუფთა ტარა ივსება Tide-ის, Fairy-ს ან PureFill-ის ორიგინალი სითხით და უბრუნდება მომხმარებელს.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: B2B PARTNER PORTAL (TIDE, FAIRY)    -->
+        <!-- ========================================== -->
+        <section id="tab-b2b" class="tab-section hidden space-y-8">
+            <div class="bg-forest-900 text-white rounded-3xl p-8 sm:p-10 shadow-xl">
+                <div class="max-w-3xl space-y-4">
+                    <span class="inline-block bg-emerald-400/20 text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-wider">
+                        სტრატეგიული პარტნიორობა ბრენდებისთვის
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-bold leading-tight">
+                        რატომ ირჩევენ გლობალური ბრენდები (Tide, Fairy) Refill-Go Direct-ს?
+                    </h2>
+                    <p class="text-forest-100 text-sm sm:text-base leading-relaxed">
+                        ჩვენ ვართ ქუთაისის საერთაშორისო უნივერსიტეტის (KIU) სტუდენტების მიერ შექმნილი ტექნოლოგიური და ლოგისტიკური პლატფორმა, რომელიც ბრენდებს აძლევს მზა Zero-Waste ინფრასტრუქტურას ნულიდან მილიონობით ინვესტიციის გარეშე.
+                    </p>
+                </div>
+
+                <!-- Key Metrics from PDF Presentation -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+                    <div class="bg-forest-950/60 border border-forest-700 p-5 rounded-2xl">
+                        <div class="text-3xl font-bold text-emerald-300">81%</div>
+                        <div class="text-sm font-semibold text-white mt-1">მზა მომხმარებელი</div>
+                        <p class="text-xs text-forest-300 mt-1">200 გამოკითხული ონლაინ მყიდველიდან 81% მზადაა გადავიდეს სისტემაზე, თუ წარმოდგენილია სანდო ბრენდები.</p>
+                    </div>
+                    <div class="bg-forest-950/60 border border-forest-700 p-5 rounded-2xl">
+                        <div class="text-3xl font-bold text-emerald-300">+15%</div>
+                        <div class="text-sm font-semibold text-white mt-1">ბაზრის წლიური ზრდა</div>
+                        <p class="text-xs text-forest-300 mt-1">ეკო-მეგობრული საყოფაცხოვრებო პროდუქტების სექტორი ყოველწლიურად 15%-ზე მეტით იზრდება.</p>
+                    </div>
+                    <div class="bg-forest-950/60 border border-forest-700 p-5 rounded-2xl">
+                        <div class="text-3xl font-bold text-emerald-300">-30%</div>
+                        <div class="text-sm font-semibold text-white mt-1">საფასო უპირატესობა</div>
+                        <p class="text-xs text-forest-300 mt-1">ერთჯერადი შეფუთვის ამოღებით მომხმარებელი ზოგავს 30%-მდე თანხას ბრენდის მარჟის დაკარგვის გარეშე.</p>
+                    </div>
+                    <div class="bg-forest-950/60 border border-forest-700 p-5 rounded-2xl">
+                        <div class="text-3xl font-bold text-emerald-300">100%</div>
+                        <div class="text-sm font-semibold text-white mt-1">ნარჩენის აღმოფხვრა</div>
+                        <p class="text-xs text-forest-300 mt-1">სრული ციკლი: Doorstep გამოწერა + ჭკვიანი ვენდინგ-სადგურები + QR სტერილიზაცია.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive B2B Partnership Request Form -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <div class="lg:col-span-6 bg-white border border-cream-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
+                    <h3 class="text-xl font-bold text-forest-900">სტრატეგიული უპირატესობები პარტნიორებისთვის</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <span class="w-6 h-6 rounded-full bg-emerald-100 text-forest-800 flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">✓</span>
+                            <div>
+                                <strong class="text-forest-900 text-sm">მზა ლოგისტიკური და IT ინფრასტრუქტურა:</strong>
+                                <p class="text-xs sm:text-sm text-forest-700">თქვენ არ გიწევთ საკუთარი Refill სადგურების, QR-აღრიცხვისა და ბოთლების სამრეცხაო ციკლის ნულიდან აწყობა.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="w-6 h-6 rounded-full bg-emerald-100 text-forest-800 flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">✓</span>
+                            <div>
+                                <strong class="text-forest-900 text-sm">Omnichannel დისტრიბუცია:</strong>
+                                <p class="text-xs sm:text-sm text-forest-700">ერთდროულად ვფარავთ ონლაინ გამოწერებს (Doorstep Delivery) და სავაჭრო ცენტრების ვენდინგ-სადგურებს.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="w-6 h-6 rounded-full bg-emerald-100 text-forest-800 flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">✓</span>
+                            <div>
+                                <strong class="text-forest-900 text-sm">Co-Branding და ESG მიზნების შესრულება:</strong>
+                                <p class="text-xs sm:text-sm text-forest-700">ერთობლივი ბრენდირებული უჟანგავი ფოლადის ბოთლები ზრდის ბრენდის ლოიალობას და პირდაპირ ამცირებს პლასტმასის კვალს.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="lg:col-span-6 bg-white border border-cream-200 rounded-3xl p-6 sm:p-8 shadow-sm">
+                    <h3 class="text-xl font-bold text-forest-900 mb-2">პარტნიორობის მოთხოვნა (B2B Pilot)</h3>
+                    <p class="text-xs sm:text-sm text-forest-700 mb-5">დატოვეთ კომპანიის მონაცემები საპილოტე პროექტისა და Co-Branding პირობების განსახილველად.</p>
+                    <form onsubmit="submitB2BForm(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-forest-800 mb-1">კომპანიის / ბრენდის დასახელება</label>
+                            <input type="text" required placeholder="მაგ: Procter & Gamble (Tide / Fairy)" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-forest-700">
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-forest-800 mb-1">საკონტაქტო პირი</label>
+                                <input type="text" required placeholder="სახელი, გვარი" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-forest-700">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-forest-800 mb-1">კორპორატიული ელ. ფოსტა</label>
+                                <input type="email" required placeholder="name@company.com" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-forest-700">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-forest-800 mb-1">თანამშრომლობის სასურველი ფორმატი</label>
+                            <select class="w-full bg-cream-50 border border-cream-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-forest-700">
+                                <option>Co-Branding ბოთლები + ონლაინ გამოწერა</option>
+                                <option>ვენდინგ-სადგურებში პროდუქციის განთავსება</option>
+                                <option>სრული Omnichannel პარტნიორობა</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-forest-800 hover:bg-forest-900 text-white font-bold py-3 rounded-xl text-sm shadow-md transition-all active:scale-95">
+                            შეთავაზების გაგზავნა
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- CART / ECO-TOTE SLIDE-OVER DRAWER          -->
+    <!-- ========================================== -->
+    <div id="cart-drawer-backdrop" onclick="toggleCartDrawer()" class="fixed inset-0 bg-forest-950/60 backdrop-blur-xs z-50 hidden transition-opacity"></div>
+    <aside id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-cream-50 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-6 bg-forest-900 text-white flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-bold">შენი ეკო-ჩანთა (Eco-Tote)</h3>
+                <p class="text-xs text-forest-200">მიწოდება მრავალჯერადი ნაჭრის ჩანთით</p>
+            </div>
+            <button onclick="toggleCartDrawer()" class="p-2 rounded-xl bg-forest-800 hover:bg-forest-700 text-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Cart Items List -->
+        <div id="cart-items-container" class="flex-1 overflow-y-auto p-6 space-y-4">
+            <!-- Injected by JS -->
+        </div>
+
+        <!-- Empty Bottle Pickup Toggle & Checkout -->
+        <div class="p-6 bg-white border-t border-cream-200 space-y-4">
+            <label class="flex items-start gap-3 p-3.5 rounded-2xl bg-forest-50 border border-forest-200 cursor-pointer">
+                <input type="checkbox" id="pickup-empty-checkbox" checked class="mt-1 w-4 h-4 accent-forest-800 rounded">
+                <div class="text-xs">
+                    <span class="font-bold text-forest-900 block">ცარიელი ბოთლების დაბრუნება კურიერისთვის</span>
+                    <span class="text-forest-700">კურიერი წაიღებს ცარიელ ბოთლებს სტერილიზაციისთვის (+2.00₾ ეკო-ბონუსი)</span>
+                </div>
+            </label>
+
+            <div class="space-y-1.5 text-sm">
+                <div class="flex justify-between text-forest-700">
+                    <span>დაზოგილი თანხა (პლასტმასის გარეშე):</span>
+                    <span id="cart-savings" class="font-semibold text-emerald-700">-6.40 ₾</span>
+                </div>
+                <div class="flex justify-between text-lg font-bold text-forest-950 pt-2 border-t border-cream-200">
+                    <span>სულ გადასახდელი:</span>
+                    <span id="cart-total">14.90 ₾</span>
+                </div>
+            </div>
+
+            <button onclick="checkoutOrder()" class="w-full bg-forest-800 hover:bg-forest-900 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all active:scale-95 text-sm">
+                შეკვეთის დადასტურება
+            </button>
+        </div>
+    </aside>
+
+    <!-- ========================================== -->
+    <!-- QR SCANNER SIMULATION MODAL                -->
+    <!-- ========================================== -->
+    <div id="qr-modal" class="fixed inset-0 bg-forest-950/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-forest-900">QR-კოდის სკანირება</h3>
+                <button onclick="closeQrScannerModal()" class="text-forest-600 hover:text-forest-900 p-1">✕</button>
+            </div>
+            <div class="bg-forest-950 rounded-2xl p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                <div class="w-44 h-44 border-2 border-emerald-400 rounded-2xl flex items-center justify-center relative">
+                    <div class="absolute inset-x-0 top-1/2 h-0.5 bg-emerald-400 animate-bounce"></div>
+                    <svg class="w-24 h-24 text-white/80" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M3 3h8v8H3V3zm2 2v4h4V5H5zm8-2h8v8h-8V3zm2 2v4h4V5h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm13-2h3v2h-3v-2zm-3 0h2v2h-2v-2zm3 3h3v2h-3v-2zm-3 3h2v2h-2v-2zm3 0h3v2h-3v-2zm-3-3h2v2h-2v-2z"/>
+                    </svg>
+                </div>
+                <p class="text-xs text-forest-200 mt-4">მიუშვირე კამერა ბოთლის ეტიკეტზე დატანილ QR-კოდს</p>
+            </div>
+            <button onclick="simulateNewQrScan()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl text-sm transition-all">
+                სკანირების სიმულაცია (ახალი ბოთლის მიბმა)
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-forest-950 text-forest-200 border-t border-forest-800 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <span class="text-lg font-bold text-white">Refill-Go Direct</span>
+                <span class="text-xs bg-forest-800 px-2.5 py-1 rounded-full text-emerald-300">KIU Startup Project</span>
+            </div>
+            <p class="text-xs text-forest-400 text-center md:text-right">
+                შექმნილია ქუთაისის საერთაშორისო უნივერსიტეტის (KIU) სტუდენტების მიერ &bull; Refill. Reuse. Reduce.
+            </p>
+        </div>
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT APPLICATION LOGIC               -->
+    <!-- ========================================== -->
+    <script>
+        // 1. PRODUCT DATA
+        const products = [
+            {
+                id: 1,
+                brand: 'Tide',
+                category: 'laundry',
+                name: 'Tide Alpine Fresh სარეცხი გელი',
+                bottleType: 'Co-Branded უჟანგავი ფოლადი',
+                price1L: 14.90,
+                retailPrice1L: 21.30, // ~30% higher in single-use plastic
+                color: '#1e40af',
+                badge: 'პოპულარული',
+                desc: 'მაღალკონცენტრირებული სარეცხი სითხე მრავალჯერად მეტალის ბოთლში.'
+            },
+            {
+                id: 2,
+                brand: 'Fairy',
+                category: 'dish',
+                name: 'Fairy Lemon ჭურჭლის სარეცხი',
+                bottleType: 'Co-Branded სქელი მინა',
+                price1L: 8.50,
+                retailPrice1L: 12.15,
+                color: '#15803d',
+                badge: '-30% ეკონომია',
+                desc: 'ძლიერი ცხიმის საწინააღმდეგო ფორმულა ბამბუკის თავსახურიან მინის ბოთლში.'
+            },
+            {
+                id: 3,
+                brand: 'PureFill',
+                category: 'cleaner',
+                name: 'PureFill ზედაპირების ეკო-საწმენდი',
+                bottleType: 'მქრქალი მწვანე ფოლადი',
+                price1L: 7.90,
+                retailPrice1L: 11.30,
+                color: '#2f654d',
+                badge: '100% ბიოდეგრადირებადი',
+                desc: 'მცენარეულ ექსტრაქტებზე დამზადებული უნივერსალური საწმენდი სითხე.'
+            },
+            {
+                id: 4,
+                brand: 'Tide',
+                category: 'softener',
+                name: 'Tide Touch of Downy დამარბილებელი',
+                bottleType: 'Co-Branded უჟანგავი ფოლადი',
+                price1L: 9.80,
+                retailPrice1L: 14.00,
+                color: '#0369a1',
+                badge: 'Co-Branding',
+                desc: 'ქსოვილის დამარბილებელი ხანგრძლივი სისუფთავის არომატით.'
+            },
+            {
+                id: 5,
+                brand: 'Fairy',
+                category: 'dish',
+                name: 'Fairy Sensitive Aloe Vera',
+                bottleType: 'Co-Branded სქელი მინა',
+                price1L: 9.20,
+                retailPrice1L: 13.15,
+                color: '#059669',
+                badge: 'ჰიპოალერგიული',
+                desc: 'ხელის კანის დამცავი ფორმულა მრავალჯერად მინის დისპენსერში.'
+            },
+            {
+                id: 6,
+                brand: 'PureFill',
+                category: 'laundry',
+                name: 'PureFill მინერალური სარეცხი სითხე',
+                bottleType: 'მქრქალი მწვანე ფოლადი',
+                price1L: 12.50,
+                retailPrice1L: 17.85,
+                color: '#3f6212',
+                badge: 'Zero-Waste',
+                desc: 'ფოსფატების გარეშე, უსაფრთხო ბავშვის ტანსაცმლისა და გარემოსთვის.'
+            }
+        ];
+
+        // 2. VENDING STATIONS DATA
+        const stations = [
+            {
+                id: 'kiu',
+                name: 'KIU უნივერსიტეტის კამპუსი — სადგური #01',
+                address: 'ქუთაისი, ახალგაზრდობის გამზ. (A კორპუსი)',
+                status: 'ღიაა 24/7',
+                tanks: [
+                    { name: 'ჭურჭლის სარეცხი', brand: 'Fairy', level: 88, color: '#d9d5b8', price: 6.50 },
+                    { name: 'სარეცხი გელი', brand: 'Tide', level: 74, color: '#f3f4f6', price: 8.90 },
+                    { name: 'საწმენდი სითხე', brand: 'PureFill', level: 92, color: '#78a885', price: 5.50 },
+                    { name: 'დამარბილებელი', brand: 'Tide', level: 65, color: '#f5f0dc', price: 6.00 }
+                ]
+            },
+            {
+                id: 'mall',
+                name: 'ურბან მოლი (Urban Mall) — ეკო ზონა',
+                address: 'ცენტრალური შესასვლელი, სართული 1',
+                status: 'ღიაა 10:00 - 22:00',
+                tanks: [
+                    { name: 'ჭურჭლის სარეცხი', brand: 'Fairy', level: 60, color: '#d9d5b8', price: 6.50 },
+                    { name: 'სარეცხი გელი', brand: 'Tide', level: 85, color: '#f3f4f6', price: 8.90 },
+                    { name: 'საწმენდი სითხე', brand: 'PureFill', level: 45, color: '#78a885', price: 5.50 },
+                    { name: 'დამარბილებელი', brand: 'Tide', level: 80, color: '#f5f0dc', price: 6.00 }
+                ]
+            },
+            {
+                id: 'central',
+                name: 'ცენტრალური სუპერმარკეტი — Green Corner',
+                address: 'რუსთაველის გამზირი #14',
+                status: 'ღიაა 09:00 - 23:00',
+                tanks: [
+                    { name: 'ჭურჭლის სარეცხი', brand: 'Fairy', level: 95, color: '#d9d5b8', price: 6.50 },
+                    { name: 'სარეცხი გელი', brand: 'Tide', level: 52, color: '#f3f4f6', price: 8.90 },
+                    { name: 'საწმენდი სითხე', brand: 'PureFill', level: 78, color: '#78a885', price: 5.50 },
+                    { name: 'დამარბილებელი', brand: 'Tide', level: 70, color: '#f5f0dc', price: 6.00 }
+                ]
+            }
+        ];
+
+        // 3. USER BOTTLES (QR LIFECYCLE) STATE
+        let userBottles = [
+            {
+                qrId: 'RG-8492-TIDE',
+                product: 'Tide Alpine Fresh (2L)',
+                material: 'უჟანგავი ფოლადი (Stainless Steel)',
+                reuses: 7,
+                status: 'აქტიურია სახლში',
+                sterilizedDate: '04 ნოე, 2026',
+                pickupRequested: false
+            },
+            {
+                qrId: 'RG-3104-FAIRY',
+                product: 'Fairy Lemon (1L)',
+                material: 'მრავალჯერადი სქელი მინა',
+                reuses: 5,
+                status: 'აქტიურია სახლში',
+                sterilizedDate: '28 ოქტ, 2026',
+                pickupRequested: false
+            }
+        ];
+
+        // 4. CART & FILTER STATE
+        let currentBrand = 'all';
+        let currentCategory = 'all';
+        let selectedStationIndex = 0;
+        let cart = [
+            {
+                productId: 1,
+                name: 'Tide Alpine Fresh სარეცხი გელი',
+                brand: 'Tide',
+                volume: 1,
+                isSubscription: true,
+                unitPrice: 13.41, // 14.90 - 10% subscription
+                retailPrice: 21.30,
+                qty: 1
+            }
+        ];
+        let totalSavedBottles = 12;
+        let totalSavedMoney = 34;
+
+        // ==========================================
+        // NAVIGATION & TAB SWITCHING
+        // ==========================================
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+            // Desktop nav styling
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('text-forest-800');
+            });
+            const activeDesktop = document.getElementById(`nav-${tabName}`);
+            if (activeDesktop) {
+                activeDesktop.classList.add('tab-active');
+                activeDesktop.classList.remove('text-forest-800');
+            }
+
+            // Mobile nav styling
+            document.querySelectorAll('.m-nav-btn').forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('bg-cream-100', 'text-forest-800');
+            });
+            const activeMobile = document.getElementById(`m-nav-${tabName}`);
+            if (activeMobile) {
+                activeMobile.classList.add('tab-active');
+                activeMobile.classList.remove('bg-cream-100', 'text-forest-800');
+            }
+        }
+
+        // ==========================================
+        // CATALOG RENDERING & INTERACTIONS
+        // ==========================================
+        function setBrandFilter(brand) {
+            currentBrand = brand;
+            document.querySelectorAll('.brand-filter-btn').forEach(btn => {
+                if (btn.dataset.brand === brand) {
+                    btn.className = 'brand-filter-btn bg-forest-800 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all';
+                } else {
+                    btn.className = 'brand-filter-btn bg-cream-200/80 hover:bg-cream-200 text-forest-900 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all';
+                }
+            });
+            renderProducts();
+        }
+
+        function setCategoryFilter(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-filter-btn').forEach(btn => {
+                if (btn.dataset.cat === cat) {
+                    btn.className = 'cat-filter-btn bg-forest-100 border-2 border-forest-700 text-forest-900 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all';
+                } else {
+                    btn.className = 'cat-filter-btn bg-white border border-cream-300 hover:border-forest-500 text-forest-800 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all';
+                }
+            });
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            const filtered = products.filter(p => {
+                const matchBrand = currentBrand === 'all' || p.brand === currentBrand;
+                const matchCat = currentCategory === 'all' || p.category === currentCategory;
+                return matchBrand && matchCat;
+            });
+
+            grid.innerHTML = filtered.map(p => `
+                <div class="bg-white rounded-3xl border border-cream-200 p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between" id="card-${p.id}">
+                    <div>
+                        <!-- Top Badges -->
+                        <div class="flex items-center justify-between gap-2 mb-4">
+                            <span class="text-xs font-bold px-3 py-1 rounded-full bg-forest-100 text-forest-900">${p.brand}</span>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-900">${p.badge}</span>
+                        </div>
+
+                        <!-- Bottle Visual Illustration -->
+                        <div class="bg-cream-100 rounded-2xl p-5 mb-4 flex items-center justify-center relative">
+                            <div class="flex flex-col items-center">
+                                <!-- Bamboo/Steel Cap -->
+                                <div class="w-8 h-3 bg-amber-700/80 rounded-t-md"></div>
+                                <!-- Bottle Neck -->
+                                <div class="w-6 h-3 bg-slate-300"></div>
+                                <!-- Bottle Body -->
+                                <div class="w-20 h-28 rounded-2xl shadow-inner flex flex-col items-center justify-center p-2 text-center border border-black/10" style="background-color: ${p.color};">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-white/90 bg-black/20 px-2 py-0.5 rounded-full">${p.brand}</span>
+                                    <span class="text-[9px] text-white/80 mt-1.5 leading-tight">Refill-Go</span>
+                                </div>
+                            </div>
+                            <span class="absolute bottom-2.5 right-3 text-[11px] font-medium text-forest-800 bg-white/80 px-2 py-0.5 rounded-lg">
+                                ${p.bottleType}
+                            </span>
+                        </div>
+
+                        <h3 class="font-bold text-lg text-forest-950 leading-snug">${p.name}</h3>
+                        <p class="text-xs text-forest-700 mt-1 line-clamp-2">${p.desc}</p>
+                    </div>
+
+                    <!-- Interactive Selectors -->
+                    <div class="mt-5 pt-4 border-t border-cream-200 space-y-3">
+                        <!-- Volume Selector -->
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-semibold text-forest-800">მოცულობა:</span>
+                            <div class="flex gap-1.5">
+                                <button onclick="updateCardPrice(${p.id}, 1)" id="vol-1-${p.id}" data-selected="true" class="vol-btn-${p.id} px-3 py-1 rounded-lg font-bold bg-forest-800 text-white">1L</button>
+                                <button onclick="updateCardPrice(${p.id}, 2)" id="vol-2-${p.id}" data-selected="false" class="vol-btn-${p.id} px-3 py-1 rounded-lg font-semibold bg-cream-100 text-forest-800">2L</button>
+                            </div>
+                        </div>
+
+                        <!-- Purchase Mode Toggle -->
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-semibold text-forest-800">შეძენის ტიპი:</span>
+                            <select id="sub-select-${p.id}" onchange="recalcCardDisplay(${p.id})" class="bg-cream-100 border border-cream-300 rounded-lg px-2.5 py-1 font-semibold text-forest-900 focus:outline-none">
+                                <option value="sub">გამოწერა (-10%)</option>
+                                <option value="once">ერთჯერადი</option>
+                            </select>
+                        </div>
+
+                        <!-- Price & Add Button -->
+                        <div class="flex items-center justify-between pt-2">
+                            <div>
+                                <span class="text-xs text-forest-500 line-through block" id="old-price-${p.id}">${p.retailPrice1L.toFixed(2)} ₾</span>
+                                <span class="text-xl font-bold text-forest-900" id="new-price-${p.id}">${(p.price1L * 0.9).toFixed(2)} ₾</span>
+                            </div>
+                            <button onclick="addToCart(${p.id})" class="bg-forest-800 hover:bg-forest-900 text-white font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex items-center gap-1.5">
+                                <span>+ დამატება</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateCardPrice(productId, volume) {
+            const btn1 = document.getElementById(`vol-1-${productId}`);
+            const btn2 = document.getElementById(`vol-2-${productId}`);
+            if (volume === 1) {
+                btn1.dataset.selected = 'true';
+                btn1.className = `vol-btn-${productId} px-3 py-1 rounded-lg font-bold bg-forest-800 text-white`;
+                btn2.dataset.selected = 'false';
+                btn2.className = `vol-btn-${productId} px-3 py-1 rounded-lg font-semibold bg-cream-100 text-forest-800`;
+            } else {
+                btn2.dataset.selected = 'true';
+                btn2.className = `vol-btn-${productId} px-3 py-1 rounded-lg font-bold bg-forest-800 text-white`;
+                btn1.dataset.selected = 'false';
+                btn1.className = `vol-btn-${productId} px-3 py-1 rounded-lg font-semibold bg-cream-100 text-forest-800`;
+            }
+            recalcCardDisplay(productId);
+        }
+
+        function recalcCardDisplay(productId) {
+            const p = products.find(item => item.id === productId);
+            const is2L = document.getElementById(`vol-2-${productId}`).dataset.selected === 'true';
+            const vol = is2L ? 2 : 1;
+            const isSub = document.getElementById(`sub-select-${productId}`).value === 'sub';
+
+            const basePrice = p.price1L * vol;
+            const finalPrice = isSub ? basePrice * 0.9 : basePrice;
+            const retailPrice = p.retailPrice1L * vol;
+
+            document.getElementById(`old-price-${productId}`).textContent = `${retailPrice.toFixed(2)} ₾`;
+            document.getElementById(`new-price-${productId}`).textContent = `${finalPrice.toFixed(2)} ₾`;
+        }
+
+        // ==========================================
+        // CART / ECO-TOTE LOGIC
+        // ==========================================
+        function addToCart(productId) {
+            const p = products.find(item => item.id === productId);
+            const is2L = document.getElementById(`vol-2-${productId}`).dataset.selected === 'true';
+            const vol = is2L ? 2 : 1;
+            const isSub = document.getElementById(`sub-select-${productId}`).value === 'sub';
+
+            const unitPrice = (p.price1L * vol) * (isSub ? 0.9 : 1);
+            const retailPrice = p.retailPrice1L * vol;
+
+            const existing = cart.find(c => c.productId === productId && c.volume === vol && c.isSubscription === isSub);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({
+                    productId: p.id,
+                    name: p.name,
+                    brand: p.brand,
+                    volume: vol,
+                    isSubscription: isSub,
+                    unitPrice: unitPrice,
+                    retailPrice: retailPrice,
+                    qty: 1
+                });
+            }
+
+            updateCartUI();
+            showToast(`დაემატა ეკო-ჩანთაში: ${p.brand} (${vol}L)`);
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-items-container');
+            const countBadge = document.getElementById('cart-count');
+            const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+            countBadge.textContent = totalQty;
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-forest-600">
+                        <p class="font-semibold">შენი ეკო-ჩანთა ცარიელია</p>
+                        <p class="text-xs mt-1">აირჩიე სასურველი პროდუქტი კატალოგიდან</p>
+                    </div>
+                `;
+                document.getElementById('cart-total').textContent = '0.00 ₾';
+                document.getElementById('cart-savings').textContent = '0.00 ₾';
+                return;
+            }
+
+            let total = 0;
+            let retailTotal = 0;
+
+            container.innerHTML = cart.map((item, idx) => {
+                total += item.unitPrice * item.qty;
+                retailTotal += item.retailPrice * item.qty;
+                return `
+                    <div class="bg-white p-4 rounded-2xl border border-cream-200 flex items-center justify-between gap-3 shadow-2xs">
+                        <div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-bold text-forest-800 bg-forest-100 px-2 py-0.5 rounded-md">${item.brand}</span>
+                                <span class="text-xs text-forest-600 font-medium">${item.volume}L</span>
+                                ${item.isSubscription ? '<span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-semibold">გამოწერა</span>' : ''}
+                            </div>
+                            <h4 class="font-bold text-sm text-forest-950 mt-1">${item.name}</h4>
+                            <div class="text-xs text-forest-700 mt-1">
+                                რაოდენობა: <strong>${item.qty}</strong> &times; ${item.unitPrice.toFixed(2)} ₾
+                            </div>
+                        </div>
+                        <button onclick="removeFromCart(${idx})" class="text-red-500 hover:bg-red-50 p-2 rounded-xl text-xs font-semibold">
+                            წაშლა
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            const pickupBonus = document.getElementById('pickup-empty-checkbox').checked ? 2.00 : 0;
+            const finalTotal = Math.max(0, total - pickupBonus);
+            const savings = (retailTotal - total) + pickupBonus;
+
+            document.getElementById('cart-total').textContent = `${finalTotal.toFixed(2)} ₾`;
+            document.getElementById('cart-savings').textContent = `-${savings.toFixed(2)} ₾`;
+        }
+
+        document.getElementById('pickup-empty-checkbox').addEventListener('change', updateCartUI);
+
+        function toggleCartDrawer() {
+            const drawer = document.getElementById('cart-drawer');
+            const backdrop = document.getElementById('cart-drawer-backdrop');
+            const isClosed = drawer.classList.contains('translate-x-full');
+
+            if (isClosed) {
+                drawer.classList.remove('translate-x-full');
+                backdrop.classList.remove('hidden');
+            } else {
+                drawer.classList.add('translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        function checkoutOrder() {
+            if (cart.length === 0) {
+                showToast('ეკო-ჩანთა ცარიელია!');
+                return;
+            }
+            const addedBottles = cart.reduce((sum, i) => sum + i.qty, 0);
+            totalSavedBottles += addedBottles;
+            totalSavedMoney += addedBottles * 6;
+
+            document.getElementById('stat-bottles').textContent = totalSavedBottles;
+            document.getElementById('stat-money').textContent = `${totalSavedMoney}₾`;
+            document.getElementById('stat-co2').textContent = `${(totalSavedBottles * 0.2).toFixed(1)}კგ`;
+
+            cart = [];
+            updateCartUI();
+            toggleCartDrawer();
+            showToast('შეკვეთა მიღებულია! კურიერი მოგიტანთ მრავალჯერადი ეკო-ჩანთით.');
+        }
+
+        // ==========================================
+        // SMART VENDING STATIONS LOGIC
+        // ==========================================
+        function renderStations() {
+            const list = document.getElementById('stations-list');
+            list.innerHTML = stations.map((st, idx) => `
+                <div onclick="selectStation(${idx})" class="p-4 rounded-2xl border-2 cursor-pointer transition-all ${idx === selectedStationIndex ? 'bg-forest-50 border-forest-700 shadow-xs' : 'bg-white border-cream-200 hover:border-forest-400'}">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-sm text-forest-950">${st.name}</span>
+                        <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900">${st.status}</span>
+                    </div>
+                    <p class="text-xs text-forest-700 mt-1">${st.address}</p>
+                </div>
+            `).join('');
+
+            const current = stations[selectedStationIndex];
+            document.getElementById('selected-station-title').textContent = current.name;
+
+            const tanksContainer = document.getElementById('vending-tanks');
+            tanksContainer.innerHTML = current.tanks.map(tank => `
+                <div class="bg-forest-950/70 border border-forest-700 rounded-2xl p-3 flex flex-col items-center text-center">
+                    <span class="text-[11px] font-bold text-emerald-300">${tank.brand}</span>
+                    <span class="text-xs font-semibold text-white mt-0.5 h-8 flex items-center">${tank.name}</span>
+                    
+                    <!-- Dispenser Cylinder Graphic -->
+                    <div class="w-16 h-28 bg-forest-800/80 rounded-xl border-2 border-amber-200/40 my-2.5 relative overflow-hidden flex items-end">
+                        <div class="w-full liquid-fill rounded-b-lg" style="height: ${tank.level}%; background-color: ${tank.color};"></div>
+                        <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-forest-950 bg-white/40 backdrop-blur-[1px] h-6 my-auto">
+                            ${tank.level}%
+                        </span>
+                    </div>
+                    <span class="text-xs font-bold text-amber-300">${tank.price.toFixed(2)} ₾ / 1L</span>
+                </div>
+            `).join('');
+        }
+
+        function selectStation(index) {
+            selectedStationIndex = index;
+            renderStations();
+        }
+
+        function simulateVendingRefill() {
+            const liquidIdx = parseInt(document.getElementById('sim-liquid').value);
+            const vol = parseInt(document.getElementById('sim-volume').value);
+            const btn = document.getElementById('sim-refill-btn');
+            const wrapper = document.getElementById('dispense-progress-wrapper');
+            const bar = document.getElementById('dispense-bar');
+            const percentText = document.getElementById('dispense-percent');
+
+            const currentStation = stations[selectedStationIndex];
+            const tank = currentStation.tanks[liquidIdx];
+
+            if (tank.level < vol * 5) {
+                showToast('აპარატში არასაკმარისი მარაგია, აირჩიეთ სხვა სადგური.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            wrapper.classList.remove('hidden');
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 20;
+                bar.style.width = `${progress}%`;
+                percentText.textContent = `${progress}%`;
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    tank.level = Math.max(5, tank.level - vol * 4);
+                    renderStations();
+
+                    totalSavedBottles += 1;
+                    totalSavedMoney += Math.round(tank.price * vol * 0.3);
+                    document.getElementById('stat-bottles').textContent = totalSavedBottles;
+                    document.getElementById('stat-money').textContent = `${totalSavedMoney}₾`;
+                    document.getElementById('stat-co2').textContent = `${(totalSavedBottles * 0.2).toFixed(1)}კგ`;
+
+                    showToast(`წარმატებით შეივსო ${vol}L ${tank.brand} (${tank.name})! დაიზოგა 1 პლასტმასის ბოთლი.`);
+                    
+                    setTimeout(() => {
+                        wrapper.classList.add('hidden');
+                        bar.style.width = '0%';
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-50');
+                    }, 1200);
+                }
+            }, 300);
+        }
+
+        // ==========================================
+        // QR BOTTLE LIFECYCLE TRACKER LOGIC
+        // ==========================================
+        function renderUserBottles() {
+            const grid = document.getElementById('user-bottles-grid');
+            document.getElementById('active-bottles-badge').textContent = userBottles.length;
+
+            grid.innerHTML = userBottles.map((b, idx) => `
+                <div class="bg-white rounded-3xl border border-cream-200 p-6 shadow-xs flex flex-col sm:flex-row items-center gap-6">
+                    <!-- Visual QR Code Block -->
+                    <div class="bg-cream-100 p-4 rounded-2xl border border-cream-300 flex flex-col items-center shrink-0">
+                        <svg class="w-24 h-24 text-forest-950" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 3h8v8H3V3zm2 2v4h4V5H5zm8-2h8v8h-8V3zm2 2v4h4V5h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm13-2h3v2h-3v-2zm-3 0h2v2h-2v-2zm3 3h3v2h-3v-2zm-3 3h2v2h-2v-2zm3 0h3v2h-3v-2zm-3-3h2v2h-2v-2z"/>
+                        </svg>
+                        <span class="text-[11px] font-mono font-bold text-forest-900 mt-2">${b.qrId}</span>
+                    </div>
+
+                    <div class="flex-1 space-y-2 text-center sm:text-left">
+                        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                            <span class="text-xs font-bold px-2.5 py-1 rounded-full ${b.pickupRequested ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900'}">
+                                ${b.status}
+                            </span>
+                            <span class="text-xs text-forest-600">სტერილიზაცია: ${b.sterilizedDate}</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-forest-950">${b.product}</h3>
+                        <p class="text-xs text-forest-700">${b.material}</p>
+                        
+                        <div class="bg-forest-50 rounded-xl p-2.5 text-xs font-semibold text-forest-900">
+                            ♻️ გამოყენებულია <strong>${b.reuses}-ჯერ</strong> — დაზოგილია ${b.reuses} პლასტმასის ბოთლი
+                        </div>
+
+                        <div class="pt-2">
+                            <button onclick="requestBottlePickup(${idx})" ${b.pickupRequested ? 'disabled' : ''} class="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold transition-all ${b.pickupRequested ? 'bg-cream-200 text-forest-600 cursor-not-allowed' : 'bg-forest-800 hover:bg-forest-900 text-white active:scale-95'}">
+                                ${b.pickupRequested ? 'კურიერი გამოძახებულია ✓' : 'ცარიელი ბოთლის დაბრუნება'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function requestBottlePickup(index) {
+            userBottles[index].pickupRequested = true;
+            userBottles[index].status = 'ელოდება კურიერს (დასაბრუნებელი)';
+            renderUserBottles();
+            showToast(`მოთხოვნა გაგზავნილია! კურიერი წაიღებს ბოთლს (${userBottles[index].qrId}) სტერილიზაციისთვის.`);
+        }
+
+        function openQrScannerModal() {
+            document.getElementById('qr-modal').classList.remove('hidden');
+        }
+
+        function closeQrScannerModal() {
+            document.getElementById('qr-modal').classList.add('hidden');
+        }
+
+        function simulateNewQrScan() {
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            userBottles.unshift({
+                qrId: `RG-${randomNum}-PURE`,
+                product: 'PureFill Eco Cleaner (1L)',
+                material: 'მქრქალი უჟანგავი ფოლადი',
+                reuses: 1,
+                status: 'ახლახან დაემატა (აქტიური)',
+                sterilizedDate: 'დღეს',
+                pickupRequested: false
+            });
+            renderUserBottles();
+            closeQrScannerModal();
+            showToast(`ახალი QR ბოთლი (RG-${randomNum}-PURE) წარმატებით მიება შენს ანგარიშს!`);
+        }
+
+        // ==========================================
+        // B2B FORM & TOAST HELPERS
+        // ==========================================
+        function submitB2BForm(e) {
+            e.preventDefault();
+            e.target.reset();
+            showToast('მადლობა! Refill-Go Direct-ის გუნდი (KIU) დაგიკავშირდებათ 24 საათში.');
+        }
+
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-forest-900 text-white border border-forest-700 px-4 py-3 rounded-2xl shadow-xl text-xs sm:text-sm font-medium flex items-center gap-2.5 animate-fade-in pointer-events-auto max-w-sm';
+            toast.innerHTML = `
+                <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Initialize App on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderProducts();
+            renderStations();
+            renderUserBottles();
+            updateCartUI();
+        });
+    </script>
+</body>
+</html>
