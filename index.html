@@ -292,7 +292,7 @@
                             </span>
                         </div>
 
-                        <!-- 4 Visual Liquid Tanks (Matching the PDF Presentation Dispenser) -->
+                        <!-- 4 Visual Liquid Tanks -->
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 my-6" id="vending-tanks">
                             <!-- Tanks rendered by JS -->
                         </div>
@@ -308,10 +308,10 @@
                                 <div>
                                     <label class="block text-xs text-forest-300 mb-1">1. აირჩიე სითხე</label>
                                     <select id="sim-liquid" class="w-full bg-forest-800 border border-forest-600 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-400">
-                                        <option value="0">Fairy ჭურჭლის სარეცხი (6.50₾/ლ)</option>
-                                        <option value="1">Tide სარეცხი გელი (8.90₾/ლ)</option>
-                                        <option value="2">PureFill საწმენდი (5.50₾/ლ)</option>
-                                        <option value="3">Tide დამარბილებელი (6.00₾/ლ)</option>
+                                        <option value="0">Fairy ჭურჭლის სარეცხი (9.90₾/ლ)</option>
+                                        <option value="1">Tide სარეცხი გელი (12.90₾/ლ)</option>
+                                        <option value="2">PureFill საწმენდი (7.90₾/ლ)</option>
+                                        <option value="3">Tide დამარბილებელი (9.80₾/ლ)</option>
                                     </select>
                                 </div>
                                 <div>
@@ -410,7 +410,7 @@
                     </p>
                 </div>
 
-                <!-- Key Metrics from PDF Presentation -->
+                <!-- Key Metrics -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
                     <div class="bg-forest-950/60 border border-forest-700 p-5 rounded-2xl">
                         <div class="text-3xl font-bold text-emerald-300">81%</div>
@@ -470,7 +470,7 @@
                     <form onsubmit="submitB2BForm(event)" class="space-y-4">
                         <div>
                             <label class="block text-xs font-semibold text-forest-800 mb-1">კომპანიის / ბრენდის დასახელება</label>
-                            <input type="text" required placeholder="მაგ: Procter & Gamble (Tide / Fairy)" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-forest-700">
+                            <input type="text" required placeholder="მაგ: Diplomat Georgia / P&G (Tide, Fairy)" class="w-full bg-cream-50 border border-cream-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-forest-700">
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
@@ -534,11 +534,11 @@
             <div class="space-y-1.5 text-sm">
                 <div class="flex justify-between text-forest-700">
                     <span>დაზოგილი თანხა (პლასტმასის გარეშე):</span>
-                    <span id="cart-savings" class="font-semibold text-emerald-700">-6.40 ₾</span>
+                    <span id="cart-savings" class="font-semibold text-emerald-700">-8.89 ₾</span>
                 </div>
                 <div class="flex justify-between text-lg font-bold text-forest-950 pt-2 border-t border-cream-200">
                     <span>სულ გადასახდელი:</span>
-                    <span id="cart-total">14.90 ₾</span>
+                    <span id="cart-total">9.61 ₾</span>
                 </div>
             </div>
 
@@ -589,7 +589,7 @@
     <!-- JAVASCRIPT APPLICATION LOGIC               -->
     <!-- ========================================== -->
     <script>
-        // 1. PRODUCT DATA
+        // 1. PRODUCT DATA (Updated with Georgian Market Prices)
         const products = [
             {
                 id: 1,
@@ -597,8 +597,8 @@
                 category: 'laundry',
                 name: 'Tide Alpine Fresh სარეცხი გელი',
                 bottleType: 'Co-Branded უჟანგავი ფოლადი',
-                price1L: 14.90,
-                retailPrice1L: 21.30, // ~30% higher in single-use plastic
+                price1L: 12.90,
+                retailPrice1L: 18.50,
                 color: '#1e40af',
                 badge: 'პოპულარული',
                 desc: 'მაღალკონცენტრირებული სარეცხი სითხე მრავალჯერად მეტალის ბოთლში.'
@@ -609,10 +609,10 @@
                 category: 'dish',
                 name: 'Fairy Lemon ჭურჭლის სარეცხი',
                 bottleType: 'Co-Branded სქელი მინა',
-                price1L: 8.50,
-                retailPrice1L: 12.15,
+                price1L: 9.90,
+                retailPrice1L: 14.50,
                 color: '#15803d',
-                badge: '-30% ეკონომია',
+                badge: '-31% ეკონომია',
                 desc: 'ძლიერი ცხიმის საწინააღმდეგო ფორმულა ბამბუკის თავსახურიან მინის ბოთლში.'
             },
             {
@@ -645,8 +645,8 @@
                 category: 'dish',
                 name: 'Fairy Sensitive Aloe Vera',
                 bottleType: 'Co-Branded სქელი მინა',
-                price1L: 9.20,
-                retailPrice1L: 13.15,
+                price1L: 10.50,
+                retailPrice1L: 15.20,
                 color: '#059669',
                 badge: 'ჰიპოალერგიული',
                 desc: 'ხელის კანის დამცავი ფორმულა მრავალჯერად მინის დისპენსერში.'
@@ -657,8 +657,8 @@
                 category: 'laundry',
                 name: 'PureFill მინერალური სარეცხი სითხე',
                 bottleType: 'მქრქალი მწვანე ფოლადი',
-                price1L: 12.50,
-                retailPrice1L: 17.85,
+                price1L: 11.90,
+                retailPrice1L: 17.00,
                 color: '#3f6212',
                 badge: 'Zero-Waste',
                 desc: 'ფოსფატების გარეშე, უსაფრთხო ბავშვის ტანსაცმლისა და გარემოსთვის.'
@@ -673,10 +673,10 @@
                 address: 'ქუთაისი, ახალგაზრდობის გამზ. (A კორპუსი)',
                 status: 'ღიაა 24/7',
                 tanks: [
-                    { name: 'ჭურჭლის სარეცხი', brand: 'Fairy', level: 88, color: '#d9d5b8', price: 6.50 },
-                    { name: 'სარეცხი გელი', brand: 'Tide', level: 74, color: '#f3f4f6', price: 8.90 },
-                    { name: 'საწმენდი სითხე', brand: 'PureFill', level: 92, color: '#78a885', price: 5.50 },
-                    { name: 'დამარბილებელი', brand: 'Tide', level: 65, color: '#f5f0dc', price: 6.00 }
+                    { name: 'ჭურჭლის სარეცხი', brand: 'Fairy', level: 88, color: '#d9d5b8', price: 9.90 },
+                    { name: 'სარეცხი გელი', brand: 'Tide', level: 74, color: '#f3f4f6', price: 12.90 },
+                    { name: 'საწმენდი სითხე', brand: 'PureFill', level: 92, color: '#78a885', price: 7.90 },
+                    { name: 'დამარბილებელი', brand: 'Tide', level: 65, color: '#f5f0dc', price: 9.80 }
                 ]
             },
             {
@@ -685,10 +685,10 @@
                 address: 'ცენტრალური შესასვლელი, სართული 1',
                 status: 'ღიაა 10:00 - 22:00',
                 tanks: [
-                    { name: 'ჭურჭლის სარეცხი', brand: 'Fairy', level: 60, color: '#d9d5b8', price: 6.50 },
-                    { name: 'სარეცხი გელი', brand: 'Tide', level: 85, color: '#f3f4f6', price: 8.90 },
-                    { name: 'საწმენდი სითხე', brand: 'PureFill', level: 45, color: '#78a885', price: 5.50 },
-                    { name: 'დამარბილებელი', brand: 'Tide', level: 80, color: '#f5f0dc', price: 6.00 }
+                    { name: 'ჭურჭლის სარეცხი', brand: 'Fairy', level: 60, color: '#d9d5b8', price: 9.90 },
+                    { name: 'სარეცხი გელი', brand: 'Tide', level: 85, color: '#f3f4f6', price: 12.90 },
+                    { name: 'საწმენდი სითხე', brand: 'PureFill', level: 45, color: '#78a885', price: 7.90 },
+                    { name: 'დამარბილებელი', brand: 'Tide', level: 80, color: '#f5f0dc', price: 9.80 }
                 ]
             },
             {
@@ -697,10 +697,10 @@
                 address: 'რუსთაველის გამზირი #14',
                 status: 'ღიაა 09:00 - 23:00',
                 tanks: [
-                    { name: 'ჭურჭლის სარეცხი', brand: 'Fairy', level: 95, color: '#d9d5b8', price: 6.50 },
-                    { name: 'სარეცხი გელი', brand: 'Tide', level: 52, color: '#f3f4f6', price: 8.90 },
-                    { name: 'საწმენდი სითხე', brand: 'PureFill', level: 78, color: '#78a885', price: 5.50 },
-                    { name: 'დამარბილებელი', brand: 'Tide', level: 70, color: '#f5f0dc', price: 6.00 }
+                    { name: 'ჭურჭლის სარეცხი', brand: 'Fairy', level: 95, color: '#d9d5b8', price: 9.90 },
+                    { name: 'სარეცხი გელი', brand: 'Tide', level: 52, color: '#f3f4f6', price: 12.90 },
+                    { name: 'საწმენდი სითხე', brand: 'PureFill', level: 78, color: '#78a885', price: 7.90 },
+                    { name: 'დამარბილებელი', brand: 'Tide', level: 70, color: '#f5f0dc', price: 9.80 }
                 ]
             }
         ];
@@ -738,8 +738,8 @@
                 brand: 'Tide',
                 volume: 1,
                 isSubscription: true,
-                unitPrice: 13.41, // 14.90 - 10% subscription
-                retailPrice: 21.30,
+                unitPrice: 11.61, // 12.90 - 10% subscription
+                retailPrice: 18.50,
                 qty: 1
             }
         ];
@@ -1228,3 +1228,7 @@
     </script>
 </body>
 </html>
+  
+
+              
+      
